@@ -8,6 +8,7 @@
 
 var validator = require('is-my-json-valid')
 var errors = require('feathers-errors')
+var _ = require('lodash')
 
 exports.myHook = function(options) {
   return function(hook) {
@@ -52,4 +53,16 @@ exports.trimSchema = function(model, options) {
     let data = hook.data
     data = filter(data);
   }
+}
+
+exports.createdAt = function() {
+  return (hook) => {
+    hook.data.created_at = new Date().toJSON();
+  };
+}
+
+exports.updatedAt = function() {
+  return (hook) => {
+    hook.data.updated_at = new Date().toJSON();
+  };
 }
