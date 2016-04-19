@@ -10,16 +10,17 @@ exports.before = {
   find: [],
   get: [],
   create: [
+    globalHooks.createdAt(),
+    globalHooks.updatedAt(),
     globalHooks.validateSchema(schema),
     globalHooks.trimSchema(schema)
   ],
   update: [
+    globalHooks.updatedAt(),
     globalHooks.validateSchema(schema),
     globalHooks.trimSchema(schema)
   ],
   patch: [
-    globalHooks.validateSchema(schema),
-    globalHooks.trimSchema(schema)
   ],
   remove: []
 };
@@ -30,6 +31,10 @@ exports.after = {
   get: [],
   create: [],
   update: [],
-  patch: [],
+  patch: [
+    // globalHooks.validateSchema(schema),
+    // globalHooks.trimSchema(schema),
+    globalHooks.updatedAt(),
+  ],
   remove: []
 };
