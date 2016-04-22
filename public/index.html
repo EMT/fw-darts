@@ -86,6 +86,7 @@
 
 
     </style>
+    <script type="text/javascript" src="./checkouts.js"></script>
     <script type="text/javascript" src="/socket.io/socket.io.js"></script>
     <script type="text/javascript" src="//cdn.rawgit.com/feathersjs/feathers-client/v1.1.0/dist/feathers.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.21/vue.min.js"></script>
@@ -115,7 +116,7 @@
     <div class="scoreboard" v-show="game_started">
       <h3>Current Match: {{ starting_point }} : Round {{round}}</h3>
       <h1 v-if="!game_finished">Shots left: {{shots}}</h1>
-      <h1 v-if="game_finished">{{message}}</h1>
+      <h1>{{message}}</h1>
       <a href="#" @click.prevent="swapCurrentPlayer">Swap</a>
       <!-- <h2 v-for="player in players">{{player.name}} - {{player.score}}</h2> -->
 
@@ -369,6 +370,8 @@
     var matches = app.service('matches');
     var shots = app.service('matches/:match_id/shots');
 
+
+
     $("#dartboard #areas g").children().hover(
       function(){
         $(this).css("opacity","0.6");
@@ -438,29 +441,32 @@
           const updatedScore = currentPlayer.score - score;
 
           vm.current_round.push(currentPlayer.score);
-          console.log(updatedScore);
+
           if (vm.checkBust(updatedScore, double)) {
-            console.log('hi');
             currentPlayer.score = updatedScore;
             vm.shots--;
-            if (vm.shots == 0) {
-              console.log('i ran > deeper');
+            vm.testCheckouts(updatedScore);
+
+            if (vm.shots == 0 && vm.game_finished != true) {
+              vm.message = '';
               vm.updatePlayerHistory(updatedScore);
               vm.resetCurrentRound();
               vm.endTurn()
             }
+
           } else {
             currentPlayer.score = vm.current_round[0];
             vm.endTurn();
           }
         },
         swapCurrentPlayer: function() {
-          console.log('swapping player');
           if (this.current_player == 0){
             this.current_player = 1
           } else {
             this.current_player = 0
           }
+          vm.message = '';
+          vm.testCheckouts(this.players[this.current_player].score);
         },
         resetShots: function() {
           this.shots = 3;
@@ -483,8 +489,8 @@
         endTurn: function() {
           vm.resetShots();
           vm.incrementRound();
-          vm.swapCurrentPlayer();
           vm.resetCurrentRound();
+          vm.swapCurrentPlayer();
         },
         checkBust: function(score, double) {
           if (score == 1 || score < 0) {
@@ -492,11 +498,7 @@
             return false;
           } else if (score == 0 && double) {
             console.log('You won!');
-            vm.updatePlayerHistory(vm.current_round);
-            vm.updatePlayerHistory(score);
-            vm.resetCurrentRound();
-            vm.game_finished = true;
-            vm.message = this.players[this.current_player].name + ' won!';
+            vm.finishGame(score);
             return true;
           } else if (score == 0) {
             console.log('You hit 0 without a double.');
@@ -504,20 +506,57 @@
           } else {
             return true;
           }
+        },
+        finishGame: function(score) {
+          vm.updatePlayerHistory(vm.current_round);
+          vm.updatePlayerHistory(score);
+          vm.resetCurrentRound();
+          vm.game_finished = true;
+          vm.message = this.players[this.current_player].name + ' won!';
+        },
+        testCheckouts: function(score) {
+          /*
+            Code modified from checkouts lookup table by Maegnes on Github:
+            https://github.com/maegnes/darts-with-friends
+          */
+          if( score <= 170 && vm.game_finished != true) {
+              console.log(score);
+            // Check, if the remaining score is able to be checked out
+            if( typeof checkouts[score] == "object" ) {
+              // Evaluate how many darts are needed to check out the current score
+              var neededDarts = 0;
+              var first = checkouts[score]['first'];
+              var second = checkouts[score]['second'];
+              var third = checkouts[score]['third'];
+
+              // Add the first needed score to the checkout string
+              var checkoutString = first;
+              neededDarts++;
+
+              // If a second score is needed to checkout the score, add it to checkout string
+              if( second != '' ) {
+                neededDarts++;
+                checkoutString += ' - ' + second;
+              }
+              // If third dart is needed, add it to the checkout string
+              if( third != '' ) {
+                checkoutString += ' - ' + third; neededDarts++;
+              }
+
+              // Check if the player has enough throws remaining to check out the current score
+               if( ( this.shots ) >= neededDarts ) {
+                  console.log(this.shots, neededDarts);
+                    // The user has more remaining throws than needed for checkout - SHOW CHECKOUT TEXT!
+                    this.message = checkoutString;
+                } else {
+                    // The user is not able to check out the current score with the remaining throws - NO CHECKOUT!
+                    this.message = 'no checkouts';
+                }
+            }
+          }
         }
       }
     })
-
-    matches.on('patched', function(match) {
-      console.log('patched');
-      if (match._id == vm.id) {
-        vm.players = match.players;
-      }
-    });
-
-    matches.on('created', function(match) {
-      apiMatches.push(match);
-    });
 
   </script>
   </body>
