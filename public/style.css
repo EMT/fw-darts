@@ -1,0 +1,77 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif';
+  font-weight: 400;
+  font-size: 16px;
+  color: #333;
+}
+
+body {
+  padding: 1em;
+}
+
+.center-text {
+  text-align: center;
+}
+
+a {
+  color: #31D8A0;
+  text-decoration: none;
+}
+
+
+.two-cols {
+  width: 50%;
+  float: left;
+}
+
+a:hover,
+a:focus {
+  color: #31D8A0;
+}
+
+
+#dartboard {
+  max-width: 100%;
+}
+
+#dartboard #areas g {
+  cursor: pointer;
+}
+
+@media screen and (max-width: 1000px) {
+  .two-cols {
+    width: 100%;
+  }
+}
+
+.results-table {
+  width: 100%;
+}
+
+.results-column {
+  width: 50%;
+  float: left;
+  border: 1px solid black;
+  text-align: center;
+}
+
+.results-cell {
+  width: 100%;
+  padding: 0.5em;
+  border-top: 1px solid black;
+}
+
+.player-name {
+  padding: 0.5rem;
+}
+
+.player-name.active {
+  background: red;
+  color: white;
+}
