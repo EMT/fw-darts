@@ -9,21 +9,36 @@ const MatchModel = {
   updated_at: {
   	type: 'string',
   },
-  player_one_name: {
-	type: 'string',
-	required: true
-  },
-  player_one_score: {
-  	type: 'number',
-  	required: true
-  },
-  player_two_name: {
-	type: 'string',
-	required: true
-  },
-  player_two_score: {
-  	type: 'number',
-  	required: true
+  players: {
+  	type: 'array',
+  	  player_one: {
+	  	type: 'object',
+		  name: {
+			type: 'string',
+			required: true
+		  },
+		  score: {
+		  	type: 'number',
+		  	required: true
+		  },
+		  history: {
+		  	type: 'array'
+		  }
+	  },
+	  player_two: {
+	  	type: 'object',
+		  name: {
+			type: 'string',
+			required: true
+		  },
+		  score: {
+		  	type: 'number',
+		  	required: true
+		  },
+		  history: {
+		  	type: 'array'
+		  }
+	  },
   },
   starting_point: {
   	// required: true,

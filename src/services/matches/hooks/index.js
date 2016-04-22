@@ -1,5 +1,11 @@
 'use strict';
 
+const generateUserId = require('./generateUserId');
+
+const calculateMoves = require('./calculateMoves');
+
+const checkBust = require('./checkBust');
+
 const globalHooks = require('../../../hooks');
 const hooks = require('feathers-hooks');
 
@@ -13,15 +19,16 @@ exports.before = {
     globalHooks.createdAt(),
     globalHooks.updatedAt(),
     globalHooks.validateSchema(schema),
-    globalHooks.trimSchema(schema)
+    globalHooks.trimSchema(schema),
+    generateUserId()
   ],
   update: [
     globalHooks.updatedAt(),
     globalHooks.validateSchema(schema),
-    globalHooks.trimSchema(schema)
+    globalHooks.trimSchema(schema),
+    checkBust()
   ],
-  patch: [
-  ],
+  patch: [checkBust()],
   remove: []
 };
 
@@ -30,11 +37,9 @@ exports.after = {
   find: [],
   get: [],
   create: [],
-  update: [],
-  patch: [
-    // globalHooks.validateSchema(schema),
-    // globalHooks.trimSchema(schema),
-    globalHooks.updatedAt(),
-  ],
+  update: [calculateMoves()],
+  patch: [// globalHooks.validateSchema(schema),
+  // globalHooks.trimSchema(schema),
+  globalHooks.updatedAt(), calculateMoves()],
   remove: []
 };
