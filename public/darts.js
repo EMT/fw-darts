@@ -1,13 +1,3 @@
-
-    var socket = io();
-    var app = feathers()
-      .configure(feathers.hooks())
-      .configure(feathers.socketio(socket));
-
-    var matches = app.service('matches');
-    var shots = app.service('matches/:match_id/shots');
-
-
     // Swap this out with plain javascript
     $("#dartboard #areas g").children().hover(
       function(){
