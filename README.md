@@ -1,4 +1,4 @@
-# darts-api
+# Darts!
 
 > 
 
