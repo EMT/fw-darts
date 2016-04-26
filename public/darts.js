@@ -31,18 +31,20 @@ $("#dartboard #areas g").children().on('click', function() {
 var vm = new Vue({
   el: '#app',
   data: {
-    player_one_name: '',
-    player_two_name: '',
-    players: [],
-    starting_point: 301,
     id: '',
+    new_game: {
+      starting_point: 301,
+      player_one_name: '',
+      player_two_name: '',
+    },
+    players: [],
     current_player: 0,
+    current_round: [],
     shots: 3,
     round: 1,
-    current_round: [],
-    message: '',
     game_started: false,
     game_finished: false
+    message: '',
   },
   ready: function() {
 
@@ -50,14 +52,14 @@ var vm = new Vue({
   methods: {
     createGame: function() {
       this.players.push({
-        name: this.player_one_name,
-        score: this.starting_point,
+        name: this.new_game.player_one_name,
+        score: this.new_game.starting_point,
         history: []
       });
 
       this.players.push({
-        name: this.player_two_name,
-        score: this.starting_point,
+        name: this.new_game.player_two_name,
+        score: this.new_game.starting_point,
         history: []
       });
 

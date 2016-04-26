@@ -13,7 +13,7 @@
 
           <div class="setup" v-show="!game_started">
             <h2>Game mode</h2>
-            <select name="gamemode" v-model="starting_point">
+            <select name="gamemode" v-model="new_game.starting_point">
               <option value="101">101</option>
               <option value="201">201</option>
               <option value="301">301</option>
@@ -21,11 +21,11 @@
               <option value="501">501</option>
             </select>
             <h2>Players</h2>
-            <input type="text" placeholder="Player One" v-model="player_one_name"> Vs <input type="text" placeholder="Player Two" v-model="player_two_name" @keydown.enter="createGame">
+            <input type="text" placeholder="Player One" v-model="new_game.player_one_name"> Vs <input type="text" placeholder="Player Two" v-model="new_game.player_two_name" @keydown.enter="createGame">
             <button type="submit" @click.prevent="createGame">Start!</button>
           </div>
           <div class="scoreboard" v-show="game_started">
-            <h3>Current Match: {{ starting_point }} : Round {{round}}</h3>
+            <h3>Current Match: {{ new_game.starting_point }} : Round {{round}}</h3>
             <h1 v-if="!game_finished">Shots left: {{shots}}</h1>
             <h1>{{message}}</h1>
             <a href="#" @click.prevent="swapCurrentPlayer">Swap</a>
