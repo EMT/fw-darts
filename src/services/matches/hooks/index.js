@@ -1,5 +1,7 @@
 'use strict';
 
+const findMostCommonShot = require('./find-most-common-shot');
+
 const updateMisses = require('./update-misses');
 
 const updateBullseyes = require('./update-bullseyes');
@@ -24,7 +26,7 @@ exports.after = {
   all: [service.hooks.toObject()],
   find: [],
   get: [],
-  create: [updateWins(), updateBullseyes(), updateMisses()],
+  create: [updateWins(), updateBullseyes(), updateMisses(), findMostCommonShot()],
   update: [],
   patch: [],
   remove: []
