@@ -16,7 +16,7 @@ const userSchema = new Schema({
   wins: {type: Number, 'default': 0},
   misses: {type: Number, 'default': 0},
   bullseyes: {type: Number, 'default': 0},
-  most_common: {type: Number, 'default': null},
+  most_common_shot: {type: Number, 'default': null},
   createdAt: { type: Date, 'default': Date.now },
   updatedAt: { type: Date, 'default': Date.now }
 });

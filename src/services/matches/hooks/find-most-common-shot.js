@@ -44,7 +44,7 @@ module.exports = function(options) {
 			}
 
 			console.log('Most common shot: ' + result);
-			return hook.app.service('users').patch(player._id, { most_common: result }, hook.params).then(data => {
+			return hook.app.service('users').patch(player._id, { most_common_shot: result }, hook.params).then(data => {
 
 			});
 		});
