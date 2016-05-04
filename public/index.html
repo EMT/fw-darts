@@ -4,6 +4,7 @@
     <link rel="stylesheet" href="./style.css">
     <script src="./checkouts.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.21/vue.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reqwest/2.0.5/reqwest.js"></script>
     <script src="https://code.jquery.com/jquery-1.12.3.js"></script>
   </head>
   <body>
@@ -11,19 +12,50 @@
       <div class="two-cols">
           <h1>Darts!</h1>
 
-          <div class="setup" v-show="!game_started">
-            <h2>Game mode</h2>
-            <select name="gamemode" v-model="new_game.starting_point">
-              <option value="101">101</option>
-              <option value="201">201</option>
-              <option value="301">301</option>
-              <option value="401">401</option>
-              <option value="501">501</option>
-            </select>
-            <h2>Players</h2>
-            <input type="text" placeholder="Player One" v-model="new_game.player_one_name"> Vs <input type="text" placeholder="Player Two" v-model="new_game.player_two_name" @keydown.enter="createGame">
-            <button type="submit" @click.prevent="createGame">Start!</button>
+          <div class="game-mode" v-show="offline == null">
+            <a href="#" @click.prevent="startOffline">Offline Mode</a>
+            <a href="#" @click.prevent="startOnline">Online Mode</a>
           </div>
+
+          <div class="pre-game" v-if="game_started == false">
+            <div class="setup" v-show="offline">
+              <h2>Starting Point</h2>
+              <select name="starting_point" v-model="new_game.starting_point">
+                <option value="101">101</option>
+                <option value="201">201</option>
+                <option value="301">301</option>
+                <option value="401">401</option>
+                <option value="501">501</option>
+              </select>
+              <h2>Players</h2>
+              <input type="text" placeholder="Player One" v-model="new_game.player_one"> Vs <input type="text" placeholder="Player Two" v-model="new_game.player_two" @keydown.enter="createGame">
+              <button type="submit" @click.prevent="createGame">Start!</button>
+            </div>
+
+            <div class="setup" v-show="online">
+              <h2>Starting Point</h2>
+              <select name="starting_point" v-model="new_game.starting_point">
+                <option value="101">101</option>
+                <option value="201">201</option>
+                <option value="301">301</option>
+                <option value="401">401</option>
+                <option value="501">501</option>
+              </select>
+              <h2>Players</h2>
+              <select name="starting_point" v-model="new_game.player_one">
+                <option disabled selected value> -- select a player -- </option>
+                <option v-for="player in new_game.player_list" value="{{player._id}}">{{player.username}}</option>
+              </select>
+              Vs
+              <select name="starting_point" v-model="new_game.player_two">
+                <option disabled selected value> -- select a player -- </option>
+                <option v-for="player in new_game.player_list" value="{{player._id}}">{{player.username}}</option>
+              </select>
+              <button type="submit" @click.prevent="createGame">Start!</button>
+
+            </div>
+          </div>
+
           <div class="scoreboard" v-show="game_started">
             <h3>Current Match: {{ new_game.starting_point }} : Round {{round}}</h3>
             <h1 v-if="!game_finished">Shots left: {{shots}}</h1>
@@ -32,11 +64,12 @@
             <div class="results-table">
               <div class="results-column" v-for="player in players">
                 <div class="player-name" v-bind:class="$index == current_player ? 'active' : ''"><h2>{{player.name}}: <b>{{player.score}}</b></h2></div>
-                <div class="results-cell" v-for="shot in player.history"><b>{{shot}}</b></div>
+                <div class="results-cell" v-for="shot in player.round_history"><b>{{shot}}</b></div>
               </div>
             </div>
           </div>
       </div>
+
       <div class="two-cols" v-show="game_started">
 
         <svg version="1.1" id="dartboard" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"

@@ -28,14 +28,22 @@ $("#dartboard #areas g").children().on('click', function() {
   }
 });
 
+function find_in_array(arr, name, value) {
+    for (var i = 0, len = arr.length; i<len; i++) {
+        if (name in arr[i] && arr[i][name] == value) return i;
+    };
+    return false;
+}
+
+
 var vm = new Vue({
   el: '#app',
   data: {
-    id: '',
     new_game: {
       starting_point: 301,
-      player_one_name: '',
-      player_two_name: '',
+      player_one: {},
+      player_two: {},
+      player_list: []
     },
     players: [],
     current_player: 0,
@@ -43,25 +51,74 @@ var vm = new Vue({
     shots: 3,
     round: 1,
     game_started: false,
-    game_finished: false
-    message: '',
+    game_finished: false,
+    offline: null,
+    message: ''
+  },
+  computed: {
+    online: function() {
+      if (this.offline == false) {
+        return true;
+      }
+    }
   },
   ready: function() {
 
   },
   methods: {
-    createGame: function() {
-      this.players.push({
-        name: this.new_game.player_one_name,
-        score: this.new_game.starting_point,
-        history: []
-      });
+    startOnline: function() {
+      this.offline = false;
 
-      this.players.push({
-        name: this.new_game.player_two_name,
-        score: this.new_game.starting_point,
-        history: []
-      });
+      reqwest({
+          url: 'http://localhost:5050/users'
+        , type: 'json'
+        , method: 'get'
+        , contentType: 'application/json'
+        , error: function (err) { }
+        , success: function (resp) {
+           vm.new_game.player_list = resp.data;
+          }
+      })
+    },
+    startOffline: function() {
+      this.offline = true;
+    },
+    createGame: function() {
+      if (this.online) {
+        var playerOne = find_in_array(this.new_game.player_list, '_id', this.new_game.player_one);
+        var playerTwo = find_in_array(this.new_game.player_list, '_id', this.new_game.player_two);
+
+        this.players.push({
+          name: this.new_game.player_list[playerOne].username,
+          _id: this.new_game.player_list[playerOne]._id,
+          score: this.new_game.starting_point,
+          round_history: [],
+          shot_history: []
+        });
+
+        this.players.push({
+          name: this.new_game.player_list[playerTwo].username,
+          _id: this.new_game.player_list[playerTwo]._id,
+          score: this.new_game.starting_point,
+          round_history: [],
+          shot_history: []
+        });
+
+      } else {
+
+        this.players.push({
+          name: this.new_game.player_one,
+          score: this.new_game.starting_point,
+          round_history: [],
+          shot_history: []
+        });
+        this.players.push({
+          name: this.new_game.player_two,
+          score: this.new_game.starting_point,
+          round_history: [],
+          shot_history: []
+        });
+      }
 
       this.game_started = true;
     },
@@ -75,10 +132,11 @@ var vm = new Vue({
         currentPlayer.score = updatedScore;
         vm.shots--;
         vm.testCheckouts(updatedScore);
+        vm.updatePlayerShotHistory(score);
 
         if (vm.shots == 0 && vm.game_finished != true) {
           vm.message = '';
-          vm.updatePlayerHistory(updatedScore);
+          vm.updatePlayerRoundHistory(updatedScore);
           vm.resetCurrentRound();
           vm.endTurn()
         }
@@ -106,13 +164,17 @@ var vm = new Vue({
     incrementRound: function() {
       this.round++;
     },
-    updatePlayerHistory: function(values) {
+    updatePlayerShotHistory: function(value) {
+      const currentPlayer = this.players[this.current_player];
+      currentPlayer.shot_history.push(value);
+    },
+    updatePlayerRoundHistory: function(values) {
       const currentPlayer = this.players[this.current_player];
 
       if (Object.prototype.toString.call( values ) === '[object Array]') {
-        currentPlayer.history = currentPlayer.history.concat(values);
+        currentPlayer.round_history = currentPlayer.round_history.concat(values);
       } else {
-        currentPlayer.history.push(values);
+        currentPlayer.round_history.push(values);
       }
     },
     endTurn: function() {
@@ -137,11 +199,35 @@ var vm = new Vue({
       }
     },
     finishGame: function(score) {
-      vm.updatePlayerHistory(vm.current_round);
-      vm.updatePlayerHistory(score);
+      vm.updatePlayerRoundHistory(vm.current_round);
+      vm.updatePlayerRoundHistory(score);
       vm.resetCurrentRound();
       vm.game_finished = true;
+
+      this.players[this.current_player].winner = true;
+
+      if (this.online) {
+        vm.postResults();
+      }
+
       vm.message = this.players[this.current_player].name + ' won!';
+    },
+    postResults: function() {
+      var matchData = {
+        starting_point: this.new_game.starting_point,
+        players: this.players,
+      }
+
+      reqwest({
+          url: 'http://localhost:5050/matches'
+        , type: 'json'
+        , method: 'post'
+        , data: matchData
+        , success: function (resp) {
+            console.log('saved to api');
+          }
+      })
+
     },
     testCheckouts: function(score) {
       /*
